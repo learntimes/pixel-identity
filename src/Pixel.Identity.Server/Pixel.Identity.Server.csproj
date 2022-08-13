@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>aspnet-Pixel.Identity.Server-ded8e698-0bbb-486c-986d-c27d1179f901</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="11.0.1" />
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+		<PackageReference Include="Blazored.FluentValidation" Version="2.0.3" />
+		<PackageReference Include="FluentValidation" Version="11.1.0" />	
+		<PackageReference Include="MailKit" Version="3.3.0" />
+		<PackageReference Include="McMaster.NETCore.Plugins.Mvc" Version="1.4.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.7" />		
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="6.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.7">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.7" />
+		<PackageReference Include="MudBlazor" Version="6.0.14" />
+		<PackageReference Include="OpenIddict.AspNetCore" Version="3.1.1" />
+		<PackageReference Include="OpenIddict.Quartz" Version="3.1.1" />
+		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.4.0" />		
+		<PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
+		<PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.7" />
+		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.22.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.22.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Pixel.Identity.Core\Pixel.Identity.Core.csproj" />
+		<ProjectReference Include="..\Pixel.Identity.Shared\Pixel.Identity.Shared.csproj" />
+		<ProjectReference Include="..\Pixel.Identity.Store.Sql.Shared\Pixel.Identity.Store.Sql.Shared.csproj" />		
+	</ItemGroup>
+
+	<!--Build the plugins project with their outputpath set to $(TargetDir)\Plugins\....-->
+	<Target Name="BuildPlugins" AfterTargets="Build">
+		<ItemGroup>
+			<!-- <DbStorePluginProject Include="..\Pixel.Identity.Store.Mongo\Pixel.Identity.Store.Mongo.csproj" />
+			<DbStorePluginProject Include="..\Pixel.Identity.Store.SqlServer\Pixel.Identity.Store.SqlServer.csproj" /> -->
+			<DbStorePluginProject Include="..\Pixel.Identity.Store.PostgreSQL\Pixel.Identity.Store.PostgreSQL.csproj" />
+		</ItemGroup>
+		<ItemGroup>
+			<!-- <MessengerPluginProject Include="..\Pixel.Identity.Messenger.Email\Pixel.Identity.Messenger.Email.csproj" /> -->
+			<MessengerPluginProject Include="..\Pixel.Identity.Messenger.Console\Pixel.Identity.Messenger.Console.csproj" />
+		</ItemGroup>
+		<MSBuild RebaseOutputs="true" Projects="@(DbStorePluginProject)" Targets="Build" Properties="OutputPath=$(TargetDir)Plugins\DbStore\%(FileName)\" />
+		<MSBuild RebaseOutputs="true" Projects="@(MessengerPluginProject)" Targets="Build" Properties="OutputPath=$(TargetDir)Plugins\Messenger\%(FileName)\" />
+	</Target>
+
+	<!--On publish add additional step to copy the plugins folder from build\plugins to publish\plugins-->
+	<Target Name="CopyPluginsOnPublish" AfterTargets="Publish">
+		<ItemGroup>
+			<PluginFiles Include="$(TargetDir)\Plugins\**\*.*" />
+		</ItemGroup>
+		<MakeDir Directories="$(PublishDir)\Plugins" />
+		<Copy SourceFiles="@(PluginFiles)" DestinationFiles="@(PluginFiles -> '$(PublishDir)Plugins\%(RecursiveDir)%(Filename)%(Extension)')" />
+	</Target>
+
+</Project>

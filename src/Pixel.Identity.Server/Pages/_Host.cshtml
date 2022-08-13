@@ -1,0 +1,25 @@
+﻿@page "/"
+@namespace Pixel.Identity.Server.Pages
+@* @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf *@
+@using Pixel.Identity.Server.Utilities
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.OpenIdConnect
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.IdentityModel.Protocols.OpenIdConnect
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+}
+
+@{
+    var tokens = new TokenProvider
+    {
+        AccessToken = await HttpContext.GetTokenAsync("access_token"),        
+        RefreshToken = await HttpContext.GetTokenAsync("refresh_token"),
+        @* XsrfToken = Xsrf.GetAndStoreTokens(HttpContext).RequestToken *@
+
+    };
+
+    Console.WriteLine($"初始化获取AccessToken={tokens.AccessToken}, RefreshToken={tokens.RefreshToken}");
+}
+<component type="typeof(App)" param-InitialState="tokens" render-mode="ServerPrerendered" />
