@@ -79,10 +79,9 @@ namespace Pixel.Identity.Server.Services
         /// constructor
         /// </summary>
         /// <param name="httpClient"></param>
-        public UserRolesService(HttpClient httpClient,TokenProvider tokenProvider)
+        public UserRolesService(HttpClient httpClient)
         {
-            this.httpClient = httpClient;
-            this.httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {tokenProvider.AccessToken}");
+            this.httpClient = httpClient;            
         }
 
         /// <inheritdoc/>

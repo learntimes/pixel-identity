@@ -48,10 +48,9 @@ namespace Pixel.Identity.Server.Services
         /// constructor
         /// </summary>
         /// <param name="httpClient"></param>
-        public ClaimsService(HttpClient httpClient, TokenProvider tokenProvider)
+        public ClaimsService(HttpClient httpClient)
         {
-            this.httpClient = httpClient;
-            this.httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {tokenProvider.AccessToken}");
+            this.httpClient = httpClient;            
         }
 
         protected abstract string GetEndPoint();
@@ -84,7 +83,7 @@ namespace Pixel.Identity.Server.Services
 
     public class UserClaimsService : ClaimsService, IUserClaimsService
     {
-        public UserClaimsService(HttpClient httpClient, TokenProvider tokenProvider) : base(httpClient, tokenProvider)
+        public UserClaimsService(HttpClient httpClient) : base(httpClient)
         {
         }
 
@@ -96,7 +95,7 @@ namespace Pixel.Identity.Server.Services
 
     public class RoleClaimsService : ClaimsService, IRoleClaimsService
     {
-        public RoleClaimsService(HttpClient httpClient, TokenProvider tokenProvider) : base(httpClient, tokenProvider)
+        public RoleClaimsService(HttpClient httpClient) : base(httpClient)
         {
         }
 

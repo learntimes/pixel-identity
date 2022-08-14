@@ -33,6 +33,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
+using System.Net.Http.Headers;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -45,40 +46,40 @@ using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Func<HttpMessageHandler> customHttpHandler = () =>
-{   
-    var handler = new HttpClientHandler();
-    // handler.ClientCertificates.Add(clientCertificate);
-    // handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-    handler.SslProtocols = SslProtocols.Tls12;
-    // handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => 
-    // { 
-    //     if(builder.Environment.IsDevelopment()) 
-    //     {
-    //         return true;
-    //     }
-    //     else
-    //     {
-    //         return sslPolicyErrors == SslPolicyErrors.None ;
-    //     }
+// Func<HttpMessageHandler> customHttpHandler = () =>
+// {
+//     var handler = new HttpClientHandler();
+//     // handler.ClientCertificates.Add(clientCertificate);
+//     // handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+//     handler.SslProtocols = SslProtocols.Tls12;
+//     // handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => 
+//     // { 
+//     //     if(builder.Environment.IsDevelopment()) 
+//     //     {
+//     //         return true;
+//     //     }
+//     //     else
+//     //     {
+//     //         return sslPolicyErrors == SslPolicyErrors.None ;
+//     //     }
 
-    // };
+//     // };
 
-    return handler;
-};
+//     return handler;
+// };
 
 // Add services to the container.
-builder.Services.Configure<KestrelServerOptions>(options =>
-{
-    options.ConfigureHttpsDefaults(options =>
-    {
-        // 注意枚举类型的含义
-        options.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
-        options.AllowAnyClientCertificate();
-        
-    });
+// builder.Services.Configure<KestrelServerOptions>(options =>
+// {
+//     options.ConfigureHttpsDefaults(options =>
+//     {
+//         // 注意枚举类型的含义
+//         options.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
+//         options.AllowAnyClientCertificate();
 
-});
+//     });
+
+// });
 
 IdentityModelEventSource.ShowPII = true;
 
@@ -99,8 +100,8 @@ builder.Services.AddControllersWithViews()
 .AddJsonOptions(options =>
 {
     //设置bool获取格式
-    options.JsonSerializerOptions.Converters.Add(new BoolJsonConverter()); 
-    options.JsonSerializerOptions.Converters.Add(new StringJsonConverter());   
+    options.JsonSerializerOptions.Converters.Add(new BoolJsonConverter());
+    options.JsonSerializerOptions.Converters.Add(new StringJsonConverter());
     //获取或设置要在转义字符串时使用的编码器
     options.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
     //空的字段不返回
@@ -113,53 +114,88 @@ builder.Services.AddControllersWithViews()
 });
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-// var baseAddress = new Uri(builder.Configuration["BaseAddress"]);
-builder.Services.AddHttpClient();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
-});
+builder.Services.AddScoped<TokenProvider>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<TokenHandler>();
+builder.Services.AddScoped<CustomMessageHandler>();
+var baseAddress = new Uri(builder.Configuration["BaseAddress"]);
+
+// builder.Services.AddSwaggerGen(c =>
+// {
+//     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+// });
 
 
 // builder.Services.AddScoped<ICertificateValidationService,CertificateValidationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
 
-
-
 // builder.Services.AddHttpClient("Pixel.Identity.UI", client => client.BaseAddress = baseAddress);
-
 // // Supply HttpClient instances that include access tokens when making requests to the server project
 // builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Pixel.Identity.UI"));
-// builder.Services.AddHttpClient<IUserRolesService, UserRolesService>(client => client.BaseAddress = baseAddress)
-// .ConfigurePrimaryHttpMessageHandler(customHttpHandler);
-// builder.Services.AddHttpClient<IUsersService, UsersService>(client => client.BaseAddress = baseAddress)
-// .ConfigurePrimaryHttpMessageHandler(customHttpHandler);
-// builder.Services.AddHttpClient<IApplicationService, ApplicationService>(client => client.BaseAddress = baseAddress)
-// .ConfigurePrimaryHttpMessageHandler(customHttpHandler);
-// builder.Services.AddHttpClient<IScopeService, ScopeService>(client => client.BaseAddress = baseAddress)
-// .ConfigurePrimaryHttpMessageHandler(customHttpHandler);
-// builder.Services.AddHttpClient<IAccountService, AccountService>(client => client.BaseAddress = baseAddress)
-// .ConfigurePrimaryHttpMessageHandler(customHttpHandler);
-// builder.Services.AddHttpClient<IExternalLoginsService, ExternalLoginsService>(client => client.BaseAddress = baseAddress)
-// .ConfigurePrimaryHttpMessageHandler(customHttpHandler);
-// builder.Services.AddHttpClient<IAuthenticatorService, AuthenticatorService>(client => client.BaseAddress = baseAddress)
-// .ConfigurePrimaryHttpMessageHandler(customHttpHandler);
-// builder.Services.AddHttpClient<IRoleClaimsService, RoleClaimsService>(client => client.BaseAddress = baseAddress)
-// .ConfigurePrimaryHttpMessageHandler(customHttpHandler);
-// builder.Services.AddHttpClient<IUserClaimsService, UserClaimsService>(client => client.BaseAddress = baseAddress)
+builder.Services.AddHttpClient<IUserRolesService, UserRolesService>(client =>
+{
+    client.BaseAddress = baseAddress;
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<TokenHandler>();
 // .ConfigurePrimaryHttpMessageHandler(customHttpHandler);
 
-builder.Services.AddScoped<TokenProvider>();
-builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IScopeService, ScopeService>();
+builder.Services.AddHttpClient<IUsersService, UsersService>(client =>
+{
+    client.BaseAddress = baseAddress;
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<TokenHandler>();
 
-builder.Services.AddScoped<IUserRolesService, UserRolesService>();
-builder.Services.AddScoped<IUsersService, UsersService>();
-builder.Services.AddScoped<IApplicationService, ApplicationService>();
-builder.Services.AddScoped<IExternalLoginsService, ExternalLoginsService>();
-builder.Services.AddScoped<IAuthenticatorService, AuthenticatorService>();
-builder.Services.AddScoped<IRoleClaimsService, RoleClaimsService>();
-builder.Services.AddScoped<IUserClaimsService, UserClaimsService>();
+builder.Services.AddHttpClient<IApplicationService, ApplicationService>(client =>
+{
+    client.BaseAddress = baseAddress;
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<TokenHandler>();
+
+builder.Services.AddHttpClient<IScopeService, ScopeService>(client =>
+{
+    client.BaseAddress = baseAddress;
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<TokenHandler>();
+// .ConfigurePrimaryHttpMessageHandler<CustomMessageHandler>();
+
+builder.Services.AddHttpClient<IAccountService, AccountService>(client =>
+{
+    client.BaseAddress = baseAddress;
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<TokenHandler>();
+
+builder.Services.AddHttpClient<IExternalLoginsService, ExternalLoginsService>(client =>
+{
+    client.BaseAddress = baseAddress;
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<TokenHandler>();
+
+builder.Services.AddHttpClient<IAuthenticatorService, AuthenticatorService>(client =>
+{
+    client.BaseAddress = baseAddress;
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<TokenHandler>();
+
+builder.Services.AddHttpClient<IRoleClaimsService, RoleClaimsService>(client =>
+{
+    client.BaseAddress = baseAddress;
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<TokenHandler>();
+
+builder.Services.AddHttpClient<IUserClaimsService, UserClaimsService>(client =>
+{
+    client.BaseAddress = baseAddress;
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<TokenHandler>();
 
 builder.Services.AddTransient<IValidator<ApplicationViewModel>, ApplicationDescriptionValidator>();
 builder.Services.AddTransient<IValidator<ScopeViewModel>, ScopeValidator>();
@@ -199,10 +235,11 @@ builder.Services.AddPlugin<IServicePlugin>(pluginsOptions["EmailSender"].Single(
     p.ConfigureService(s, builder.Configuration);
 });
 
+
 var authenticationBuilder = builder.Services.AddAuthentication(
     options =>
     {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;       
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
     })
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
@@ -211,24 +248,25 @@ var authenticationBuilder = builder.Services.AddAuthentication(
         options.SlidingExpiration = true;
     })
     .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
-    {                    
+    {
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.SignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
-        options.ClientId = "pixel-identity-ui2";                    
+        options.ClientId = "pixel-identity-ui2";
+        options.ClientSecret = "pixel-identity-ui2-secret";
         // options.Authority = "https://localhost:7109/pauth";  
-          options.Authority = "https://pixel.docker.localhost/pauth";
+        options.Authority = "https://pixel.docker.localhost/pauth";
         options.RequireHttpsMetadata = false;
         options.GetClaimsFromUserInfoEndpoint = true;
         options.ResponseType = OpenIdConnectResponseType.Code;
         options.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
-        options.SaveTokens = true;                         
+        options.SaveTokens = true;
         options.Scope.Add("email");
         options.Scope.Add("roles");
-        options.Scope.Add("offline_access"); 
+        options.Scope.Add("offline_access");
         options.MapInboundClaims = false;
         options.TokenValidationParameters.NameClaimType = "name";
-        options.TokenValidationParameters.RoleClaimType = "role";                  
-        
+        options.TokenValidationParameters.RoleClaimType = "role";
+
     }
 );
 foreach (var externalProvider in pluginsOptions["OAuthProvider"])
@@ -377,15 +415,15 @@ else
     app.UseHsts();
 }
 
-// app.UsePathBase("/pauth");
+app.UsePathBase("/");
 
 // app.UseSerilogRequestLogging();
 
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pixel Persistence V1");
-});
+// app.UseSwagger();
+// app.UseSwaggerUI(c =>
+// {
+//     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pixel Persistence V1");
+// });
 
 app.UseHttpsRedirection();
 
@@ -403,7 +441,7 @@ app.MapBlazorHub()
 .RequireAuthorization(
     new AuthorizeAttribute
     {
-        AuthenticationSchemes = OpenIdConnectDefaults.AuthenticationScheme            
+        AuthenticationSchemes = OpenIdConnectDefaults.AuthenticationScheme
     }
 );
 app.MapFallbackToPage("/_Host");

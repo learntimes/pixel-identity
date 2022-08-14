@@ -5,8 +5,7 @@ using Pixel.Identity.Shared.Responses;
 using Pixel.Identity.Shared.ViewModels;
 using Pixel.Identity.Server.Utilities;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Pixel.Identity.Server.Services
@@ -61,13 +60,10 @@ namespace Pixel.Identity.Server.Services
         /// constructor
         /// </summary>
         /// <param name="httpClient"></param>
-        public ScopeService(IHttpClientFactory clientFactory,TokenProvider tokenProvider)
+        public ScopeService(HttpClient httpClient)
         {
-            this.httpClient = clientFactory.CreateClient();
-            this.httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {tokenProvider.AccessToken}");
-            this.httpClient.BaseAddress=new Uri("https://localhost:7109/pauth");
+            this.httpClient = httpClient;            
         }
-
         /// <inheritdoc/>
         public async Task<PagedList<ScopeViewModel>> GetScopesAsync(GetScopesRequest request)
         {
@@ -80,7 +76,7 @@ namespace Pixel.Identity.Server.Services
             {
                 queryStringParam.Add("scopesFilter", request.ScopesFilter);
             }
-            return await this.httpClient.GetFromJsonAsync<PagedList<ScopeViewModel>>(QueryHelpers.AddQueryString("api/scopes", queryStringParam));          
+            return await this.httpClient.GetFromJsonAsync<PagedList<ScopeViewModel>>(QueryHelpers.AddQueryString("scopes", queryStringParam));          
         }
 
         /// <inheritdoc/>

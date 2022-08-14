@@ -5,11 +5,11 @@
                 <MudAvatar>@context.User.Identity.Name.First()</MudAvatar>
             </ActivatorContent>
             <ChildContent>
-                <MudMenuItem id="profileMenuItem" Link="/Account/Manage">Profile</MudMenuItem>
+                <MudMenuItem id="profileMenuItem" Link="Identity/Account/Manage">Profile</MudMenuItem>
                 <MudMenuItem id="signOutMenuItem" >
-                    <form method="post" action="Account/LogOut">
+                    <form method="post" action="Identity/Account/LogOut">
                         <button type="submit" class="nav-link btn btn-link">Sign Out</button>
-                        <MudButton id="logoutPageLink" Link="/Account/LogOut" 
+                        <MudButton id="logoutPageLink" Link="Identity/Account/LogOut" 
                             Variant="Variant.Outlined" Color="Color.Tertiary" Class="mr-5">
                             Sign Out2
                         </MudButton>
@@ -20,12 +20,12 @@
     </Authorized>
     <NotAuthorized>
         <MudToolBar Spacing="5">
-            <MudButton id="registerPageLink" Link="/Account/Register"                      
+            <MudButton id="registerPageLink" Link="Identity/Account/Register"                      
                        Variant="Variant.Outlined"
                        Color="Color.Tertiary" Class="mr-5">
                 Register
             </MudButton>
-            <MudButton id="loginPageLink" Link="/Account/Login"                   
+            <MudButton id="loginPageLink" Link="Identity/Account/Login"                   
                        Variant="Variant.Outlined"
                        Color="Color.Tertiary" Class="mr-5">
                 Login

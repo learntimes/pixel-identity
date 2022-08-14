@@ -2,7 +2,7 @@
 
 @code {
     protected override void OnInitialized()
-    {
-        Navigation.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(Navigation.ToBaseRelativePath(Navigation.Uri))}");
+    {        
+        Navigation.NavigateTo($"Identity/Account/Login?returnUrl={Uri.EscapeDataString(Navigation.ToBaseRelativePath(Navigation.Uri))}");
     }
 }

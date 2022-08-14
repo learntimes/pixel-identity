@@ -72,11 +72,9 @@ namespace Pixel.Identity.Server.Services
         /// constructor
         /// </summary>
         /// <param name="httpClient"></param>
-        public AccountService(IHttpClientFactory clientFactory,TokenProvider tokenProvider)
+        public AccountService(HttpClient httpClient)
         {
-            this.httpClient = clientFactory.CreateClient();
-            this.httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {tokenProvider.AccessToken}");
-            this.httpClient.BaseAddress=new Uri("https://localhost:7109/pauth");
+            this.httpClient = httpClient;            
         }
 
         /// <inheritdoc/> 

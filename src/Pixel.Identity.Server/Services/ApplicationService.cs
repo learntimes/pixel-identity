@@ -60,10 +60,9 @@ namespace Pixel.Identity.Server.Services
         /// constructor
         /// </summary>
         /// <param name="httpClient"></param>
-        public ApplicationService(HttpClient httpClient,TokenProvider tokenProvider)
+        public ApplicationService(HttpClient httpClient)
         {
-            this.httpClient = httpClient;
-            this.httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {tokenProvider.AccessToken}");
+            this.httpClient = httpClient;            
         }
 
         /// <inheritdoc/>
