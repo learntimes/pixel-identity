@@ -16,6 +16,7 @@ using Serilog;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Primitives;
 
 namespace Pixel.Identity.Provider
 {
@@ -35,10 +36,30 @@ namespace Pixel.Identity.Provider
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.ConfigureHttpLogging(Configuration);
+            //services.ConfigureHttpLogging(Configuration);           
 
             var pluginsOptions = new PluginOptions();
-            Configuration.GetSection(PluginOptions.Plugins).Bind(pluginsOptions);
+            // Configuration.GetSection(PluginOptions.Plugins).Bind(pluginsOptions);
+
+            //用于调试找不到配置
+            var cs = Configuration.GetSection(PluginOptions.Plugins);
+            if (cs.Value == null)
+            {                
+                var config = new ConfigurationBuilder()
+                .AddJsonFile(path: "appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+                config.GetSection(PluginOptions.Plugins).Bind(pluginsOptions);
+                ChangeToken.OnChange(() => config.GetReloadToken(), () =>
+                {                    
+                    config.GetSection(PluginOptions.Plugins).Bind(pluginsOptions);
+                });
+
+            }
+            else
+            {
+                cs.Bind(pluginsOptions);
+            }          
+
 
             //To forward the scheme from the proxy in non - IIS scenarios
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -49,14 +70,14 @@ namespace Pixel.Identity.Provider
             });
 
             //Add plugin assembly type to application part so that controllers in this assembly can be discovered by asp.net
-            services.AddControllersWithViews();               
+            services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSwaggerGen(c =>
             {
                 c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             });
-           
+
             services.AddMudServices(config =>
             {
                 config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopRight;
@@ -70,7 +91,7 @@ namespace Pixel.Identity.Provider
 
             ConfigureCors(services);
 
-            services.AddPlugin<IServicePlugin>(pluginsOptions["EmailSender"].Single(), (p, s) => 
+            services.AddPlugin<IServicePlugin>(pluginsOptions["EmailSender"].Single(), (p, s) =>
             {
                 p.ConfigureService(s, this.Configuration);
             });
@@ -79,11 +100,11 @@ namespace Pixel.Identity.Provider
             foreach (var externalProvider in pluginsOptions["OAuthProvider"])
             {
                 services.AddPlugin<IExternalAuthProvider>(externalProvider, (p, s) =>
-                { 
-                    p.AddProvider(this.Configuration, authenticationBuilder); 
-                });              
-            }        
-       
+                {
+                    p.AddProvider(this.Configuration, authenticationBuilder);
+                });
+            }
+
             services.AddPlugin<IDataStoreConfigurator>(pluginsOptions["DbStore"].Single(), (p, s) =>
             {
                 p.ConfigureAutoMap(s);
@@ -116,9 +137,9 @@ namespace Pixel.Identity.Provider
             }
 
             app.UsePathBase("/pauth");
-           
+
             app.UseSerilogRequestLogging();
-           
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -128,7 +149,7 @@ namespace Pixel.Identity.Provider
             //app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
-         
+
             app.UseRouting();
             app.UseCors();
 
@@ -141,7 +162,7 @@ namespace Pixel.Identity.Provider
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
             });
-        }      
+        }
 
         /// <summary>
         /// Configure the Cors so that different clients can consume api
@@ -206,15 +227,16 @@ namespace Pixel.Identity.Provider
         private void ConfigureOpenIddict(IServiceCollection services, IDataStoreConfigurator configurator)
         {
             //Configure Identity will call services.AddIdentity which will AddAuthentication  
-            configurator.ConfigureIdentity(this.Configuration, services) 
+            configurator.ConfigureIdentity(this.Configuration, services)
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
-            services.ConfigureApplicationCookie(opts => {
-                opts.LoginPath = "/Identity/Account/Login";                
-            });           
+            services.ConfigureApplicationCookie(opts =>
+            {
+                opts.LoginPath = "/Identity/Account/Login";
+            });
 
-            var openIdBuilder = services.AddOpenIddict()        
+            var openIdBuilder = services.AddOpenIddict()
             // Register the OpenIddict server components.
             .AddServer(options =>
             {

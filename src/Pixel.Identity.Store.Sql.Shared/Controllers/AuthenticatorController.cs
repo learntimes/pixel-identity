@@ -6,7 +6,7 @@ using System.Text.Encodings.Web;
 
 namespace Pixel.Identity.Store.Sql.Shared.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes ="OpenIddict.Validation.AspNetCore")]
     [ApiController]
     [Route("api/[controller]")]
     public class AuthenticatorController : AuthenticatorController<ApplicationUser, Guid>

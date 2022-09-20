@@ -35,43 +35,98 @@ public class Worker : IHostedService
 
         var applicationManager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
-        if (await applicationManager.FindByClientIdAsync("pixel-identity-ui") is null)
+        if (await applicationManager.FindByClientIdAsync("client-server") is null)
         {
-            if (!string.IsNullOrEmpty(configuration["IdentityHost"]))
+            if (!string.IsNullOrEmpty(configuration["IdentityHost"]))           
             {
                 await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
                 {
-                    ClientId = "pixel-identity-ui",
+                    ClientId = "client-server",
+                    ConsentType = ConsentTypes.Explicit,
+                    DisplayName = "client-server",
+                    Type = ClientTypes.Confidential,
+                    ClientSecret = "client-server-secret",
+                    PostLogoutRedirectUris =
+                    {
+                       //for server
+                        new Uri($"https://localhost:7226/signout-callback-oidc")
+                    },
+                    RedirectUris =
+                    {
+                        //for server
+                        new Uri($"https://localhost:7226/signin-oidc")
+                    },
+                    Permissions =
+                    {
+                        Permissions.Endpoints.Authorization,
+                        Permissions.Endpoints.Logout,
+                        Permissions.Endpoints.Token,                
+                        Permissions.GrantTypes.AuthorizationCode,
+                        Permissions.GrantTypes.RefreshToken,
+                        Permissions.ResponseTypes.Code,
+                        Permissions.Scopes.Email,
+                        Permissions.Scopes.Profile,
+                        Permissions.Scopes.Roles,
+                         Permissions.Prefixes.Scope + "client_api"
+                    },
+                    Requirements =
+                    {
+                        Requirements.Features.ProofKeyForCodeExchange
+                    }
+                });
+                logger.LogInformation("Added application descriptor for client-server");
+            }
+            else
+            {
+                throw new ConfigurationErrorsException("A non-empty value is required for 'IdentityHost'");
+            }
+        }
+
+        if (await applicationManager.FindByClientIdAsync("pixel-identity-ui2") is null)
+        {
+            if (!string.IsNullOrEmpty(configuration["IdentityHost"]))            
+            {
+                await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
+                {
+                    ClientId = "pixel-identity-ui2",
                     ConsentType = ConsentTypes.Implicit,
                     DisplayName = "Pixel Identity",
                     Type = ClientTypes.Public,
                     PostLogoutRedirectUris =
-                {
-                    new Uri($"{configuration["IdentityHost"]}/authentication/logout-callback")
-                },
+                    {
+                        //for wasm
+                        //new Uri($"{configuration["IdentityHost"]}/authentication/logout-callback")
+
+                        //for server
+                        new Uri($"{configuration["IdentityHost"]}/signout-callback-oidc")
+                    },
                     RedirectUris =
-                {
-                    new Uri($"{configuration["IdentityHost"]}/authentication/login-callback")
-                },
+                    {
+                        //for wasm
+                        //new Uri($"{configuration["IdentityHost"]}/authentication/login-callback")
+
+                        //for server
+                        new Uri($"{configuration["IdentityHost"]}/signin-oidc")
+                    },
                     Permissions =
-                {
-                    Permissions.Endpoints.Authorization,
-                    Permissions.Endpoints.Logout,
-                    Permissions.Endpoints.Token,
-                    Permissions.Endpoints.Introspection,
-                    Permissions.GrantTypes.AuthorizationCode,
-                    Permissions.GrantTypes.RefreshToken,
-                    Permissions.ResponseTypes.Code,
-                    Permissions.Scopes.Email,
-                    Permissions.Scopes.Profile,
-                    Permissions.Scopes.Roles
-                },
+                    {
+                        Permissions.Endpoints.Authorization,
+                        Permissions.Endpoints.Logout,
+                        Permissions.Endpoints.Token,
+                        Permissions.Endpoints.Introspection,
+                        Permissions.GrantTypes.AuthorizationCode,
+                        Permissions.GrantTypes.RefreshToken,
+                        Permissions.ResponseTypes.Code,
+                        Permissions.Scopes.Email,
+                        Permissions.Scopes.Profile,
+                        Permissions.Scopes.Roles
+                    },
                     Requirements =
-                {
-                    Requirements.Features.ProofKeyForCodeExchange
-                }
+                    {
+                        Requirements.Features.ProofKeyForCodeExchange
+                    }
                 });
-                logger.LogInformation("Added application descriptor for pixel-identity-ui");
+                logger.LogInformation("Added application descriptor for pixel-identity-ui2");
             }
             else
             {
@@ -80,8 +135,15 @@ public class Worker : IHostedService
         }
 
         var scopeManager = scope.ServiceProvider.GetRequiredService<IOpenIddictScopeManager>();
-        if(await scopeManager.CountAsync() == 0 )
+        if (await scopeManager.CountAsync() == 0)
         {
+
+            await scopeManager.CreateAsync(new OpenIddictScopeDescriptor()
+            {
+                Name = "client_api",
+                DisplayName = "client_api"
+            });
+
             await scopeManager.CreateAsync(new OpenIddictScopeDescriptor()
             {
                 Name = "persistence-api",
@@ -97,7 +159,7 @@ public class Worker : IHostedService
         }
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-        if(roleManager.Roles.Count() == 0)
+        if (roleManager.Roles.Count() == 0)
         {
             await roleManager.CreateAsync(new ApplicationRole() { Name = "IdentityAdmin" });
             var role = await roleManager.FindByNameAsync("IdentityAdmin");
@@ -118,7 +180,7 @@ public class Worker : IHostedService
         }
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        if(userManager.Users.Count() == 0)
+        if (userManager.Users.Count() == 0)
         {
             if (!string.IsNullOrEmpty(configuration["InitAdminUser"]) && !string.IsNullOrEmpty(configuration["InitAdminUserPass"]))
             {

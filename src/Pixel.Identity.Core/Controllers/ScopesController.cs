@@ -15,6 +15,7 @@ namespace Pixel.Identity.Core.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Policy = Policies.CanManageScopes)]
+    [Produces("application/json")]
     public abstract class ScopesController : ControllerBase
     {
         protected readonly IMapper mapper;
@@ -31,7 +32,7 @@ namespace Pixel.Identity.Core.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpGet()]
+        [HttpGet("GetAll")]
         public abstract Task<PagedList<ScopeViewModel>> GetAll([FromQuery] GetScopesRequest request);
       
 

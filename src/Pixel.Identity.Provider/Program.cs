@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using System;
+using System.Net;
 
 namespace Pixel.Identity.Provider;
 
@@ -43,4 +44,16 @@ public class Program
             {
                 webBuilder.UseStartup<Startup>();
             });
+            // .ConfigureWebHostDefaults(options =>
+            //     options.UseStartup<Startup>()
+            //         .ConfigureKestrel((context, options) =>
+            //         {
+            //             options.Listen(IPAddress.Any, 44382, listionOptions =>
+            //             {
+            //                 listionOptions.UseHttps("/home/administrator/Projects/nets/pixel-identity/.certificates/localhost.pfx", string.Empty);
+            //             });
+
+            //         }));
 }
+
+

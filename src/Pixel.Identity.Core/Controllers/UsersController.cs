@@ -74,6 +74,7 @@ namespace Pixel.Identity.Core.Controllers
         /// <param name="userName"></param>
         /// <returns></returns>       
         [HttpGet("name/{userName}")]
+        [Authorize(Policy = Policies.CanManageUsers)]
         public async Task<ActionResult<UserDetailsViewModel>> GetUserByName(string userName)
         {
             var user = await userManager.FindByNameAsync(userName);
@@ -97,6 +98,7 @@ namespace Pixel.Identity.Core.Controllers
 
 
         [HttpGet("id/{userId}")]
+        [Authorize(Policy = Policies.CanManageUsers)]
         public async Task<ActionResult<UserDetailsViewModel>> GetUserById(string userId)
         {
             var user = await userManager.FindByIdAsync(userId);

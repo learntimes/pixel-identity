@@ -13,6 +13,7 @@ namespace Pixel.Identity.Store.Sql.Shared.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Policy = Policies.CanManageScopes)]
+    [Produces("application/json")]
     public class ScopesController : Core.Controllers.ScopesController
     {
         private readonly IOpenIddictApplicationManager applicationManager;
@@ -24,7 +25,7 @@ namespace Pixel.Identity.Store.Sql.Shared.Controllers
         }
 
         ///<inheritdoc/>
-        [HttpGet()]
+        [HttpGet("GetAll")]
         public override async Task<PagedList<ScopeViewModel>> GetAll([FromQuery] GetScopesRequest request)
         {
             List<ScopeViewModel> scopeDescriptors = new List<ScopeViewModel>();

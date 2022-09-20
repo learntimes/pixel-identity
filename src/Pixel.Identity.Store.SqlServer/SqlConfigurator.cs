@@ -95,7 +95,7 @@ public class SqlConfigurator : IDataStoreConfigurator
             .AddRazorPagesOptions(options =>
             {
                 options.Conventions.Add(new IdentityPageModelConvention<ApplicationUser, Guid>());
-            }); ;                
+            });                
         services.AddHostedService<Worker>();
     }
 }

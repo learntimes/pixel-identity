@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixel.Identity.Provider", "src\Pixel.Identity.Provider\Pixel.Identity.Provider.csproj", "{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixel.Identity.UI.Client", "src\Pixel.Identity.UI.Client\Pixel.Identity.UI.Client.csproj", "{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixel.Identity.Shared", "src\Pixel.Identity.Shared\Pixel.Identity.Shared.csproj", "{A549C971-2306-45A0-BDCD-D210523FFBB3}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{8F59DA83-60F4-485A-B8C7-B17936EC00A2}"
@@ -49,6 +45,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\identity-test-docker-image-with-postgres.yaml = .github\workflows\identity-test-docker-image-with-postgres.yaml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2DA4CCDE-E4D5-4DBB-BBBD-83742DF27F74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixel.Identity.Server", "src\Pixel.Identity.Server\Pixel.Identity.Server.csproj", "{2957356A-525E-4CFE-B03F-18B0058F3EA4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,30 +59,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Debug|x64.Build.0 = Debug|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Debug|x86.Build.0 = Debug|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Release|x64.ActiveCfg = Release|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Release|x64.Build.0 = Release|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Release|x86.ActiveCfg = Release|Any CPU
-		{F779E136-A2F5-41FA-B4AB-02C9DE9C8CCB}.Release|x86.Build.0 = Release|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Debug|x64.Build.0 = Debug|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Debug|x86.Build.0 = Debug|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Release|x64.ActiveCfg = Release|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Release|x64.Build.0 = Release|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Release|x86.ActiveCfg = Release|Any CPU
-		{F7E50B7A-C3EB-4DD6-9B19-67020C1F9C97}.Release|x86.Build.0 = Release|Any CPU
 		{A549C971-2306-45A0-BDCD-D210523FFBB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A549C971-2306-45A0-BDCD-D210523FFBB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A549C971-2306-45A0-BDCD-D210523FFBB3}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -239,6 +215,18 @@ Global
 		{440B2ECE-5DCF-481D-9C18-0EC8F4F18E98}.Release|x64.Build.0 = Release|Any CPU
 		{440B2ECE-5DCF-481D-9C18-0EC8F4F18E98}.Release|x86.ActiveCfg = Release|Any CPU
 		{440B2ECE-5DCF-481D-9C18-0EC8F4F18E98}.Release|x86.Build.0 = Release|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Debug|x64.Build.0 = Debug|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Debug|x86.Build.0 = Debug|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Release|x64.ActiveCfg = Release|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Release|x64.Build.0 = Release|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Release|x86.ActiveCfg = Release|Any CPU
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -249,6 +237,7 @@ Global
 		{535B958A-7CEF-43EC-9545-3CE999D74889} = {D1F9C105-5E1A-42B0-A47F-3DD3B223AD8C}
 		{440B2ECE-5DCF-481D-9C18-0EC8F4F18E98} = {90291008-5EF2-4A1F-9B89-19216A3B017F}
 		{1872169C-F107-43FD-AE02-6DDF88241644} = {2454553A-208B-4D0F-A877-66F67C550DB4}
+		{2957356A-525E-4CFE-B03F-18B0058F3EA4} = {2DA4CCDE-E4D5-4DBB-BBBD-83742DF27F74}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D2D4C886-7F44-4E77-9010-D9AB3C1B559C}

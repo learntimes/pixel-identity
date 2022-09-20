@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +42,7 @@ namespace Pixel.Identity.Core.Areas.Identity.Pages.Account
         public virtual Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null) => throw new NotImplementedException();
     }
 
-    public class ExternalLoginModel<TUser, TKey> : ExternalLoginModel 
+    public class ExternalLoginModel<TUser, TKey> : ExternalLoginModel
         where TUser : IdentityUser<TKey>, new()
         where TKey : IEquatable<TKey>
     {
@@ -84,10 +86,11 @@ namespace Pixel.Identity.Core.Areas.Identity.Pages.Account
                 ErrorMessage = $"Error from external provider: {remoteError}";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
-            var info = await signInManager.GetExternalLoginInfoAsync();
+            // var info = await signInManager.GetExternalLoginInfoAsync();            
+            var info = await Custom_GetExternalLoginInfoAsync();
             if (info == null)
             {
-                ErrorMessage = "Error loading external login information.";
+                ErrorMessage = "Error loading external login information.1";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
@@ -95,6 +98,7 @@ namespace Pixel.Identity.Core.Areas.Identity.Pages.Account
             var result = await signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
+                Console.WriteLine("ExternalSignIn Success...... ");
                 logger.LogInformation("User logged in with {LoginProvider} provider.", info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
@@ -104,6 +108,7 @@ namespace Pixel.Identity.Core.Areas.Identity.Pages.Account
             }
             else
             {
+                Console.WriteLine("ExternalSignIn Fail...... ");
                 // If the user does not have an account, then ask the user to create an account.
                 ReturnUrl = returnUrl;
                 ProviderDisplayName = info.ProviderDisplayName;
@@ -118,11 +123,97 @@ namespace Pixel.Identity.Core.Areas.Identity.Pages.Account
             }
         }
 
+        private async Task<ExternalLoginInfo> Custom_GetExternalLoginInfoAsync()
+        {
+
+            var rt = await HttpContext.AuthenticateAsync(OpenIdConnectDefaults.AuthenticationScheme);
+
+            #region 用于测试
+
+            if (rt != null)
+            {
+                if (rt.Ticket != null)
+                {
+                    Console.WriteLine("===================显示Ticket中的数据 : ===================");
+                    Console.WriteLine("Start Output Items Of TicketProperties :");
+                    foreach (var item in rt.Ticket.Properties.Items)
+                    {
+                        Console.WriteLine(item.Key + " : " + item.Value);
+                    }
+                }
+
+                if (rt.Properties.Items != null)
+                {
+                    Console.WriteLine("===================显示Properties中的数据 : ===================");
+                    Console.WriteLine("Start Output Items Of ResultProperties :");
+                    foreach (var item in rt.Properties.Items)
+                    {
+                        Console.WriteLine(item.Key + " : " + item.Value);
+
+                    }
+                }
+                if (rt.Principal != null)
+                {
+                    Console.WriteLine("===================显示Principal中的数据 : ===================");
+                    Console.WriteLine("Start Output Identities Claims Of ResultProperties :");
+                    foreach (var item in rt.Principal.Identities)
+                    {
+                        Console.WriteLine(item.Name + " : ");
+                        foreach (var ci in item.Claims)
+                        {
+                            Console.WriteLine(ci.Value);
+                        }
+                    }
+                    Console.WriteLine("Start Output Each Claim Of ResultProperties :");
+                    foreach (var item in rt.Principal.Claims)
+                    {
+                        Console.WriteLine(item.Type + " : " + item.Value);
+                    }
+                }
+            }
+
+            Console.WriteLine("===================显示User中的数据 : ===================");
+            Console.WriteLine("Start Output Each Claim Of User :");
+            foreach (var item in User.Claims)
+            {
+                Console.WriteLine(item.Type + " : " + item.Value);
+            }
+
+            Console.WriteLine("User.Identity.Name :" + User.Identity.Name);
+
+            #endregion
+
+            // var providerKey = rt.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            // string providerKey = rt.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value.ToString();
+            //上面providerKey测试无效    
+            string providerKey = rt.Principal.Claims.Where(c => c.Type == "sub").FirstOrDefault().Value.ToString();
+            var provider = rt.Properties.Items["LoginProvider"] as string;
+            Console.WriteLine("provider : " + provider);
+            Console.WriteLine("providerKey : " + providerKey);
+
+            if (providerKey == null || provider == null)
+            {
+                return null;
+            }
+            var providerDisplayName = (await signInManager.GetExternalAuthenticationSchemesAsync()).FirstOrDefault(p => p.Name == provider)?.DisplayName
+                                        ?? provider;
+            Console.WriteLine("providerDisplayName : " + providerDisplayName);
+
+            var info = new ExternalLoginInfo(rt.Principal, provider, providerKey, providerDisplayName)
+            {
+                AuthenticationTokens = rt.Properties?.GetTokens(),
+                AuthenticationProperties = rt.Properties
+            };
+
+            return info;
+        }
+
         public override async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
             // Get the information about the user from the external login provider
-            var info = await signInManager.GetExternalLoginInfoAsync();
+            // var info = await signInManager.GetExternalLoginInfoAsync();
+            var info = await Custom_GetExternalLoginInfoAsync();
             if (info == null)
             {
                 ErrorMessage = "Error loading external login information during confirmation.";

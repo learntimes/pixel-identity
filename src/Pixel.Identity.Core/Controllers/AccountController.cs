@@ -14,7 +14,7 @@ namespace Pixel.Identity.Core.Controllers
     /// </summary>
     /// <typeparam name="TUser"></typeparam>
     [Route("api/[controller]")]
-    [ApiController]
+    [ApiController]   
     public class AccountController<TUser, TKey> : Controller 
         where TUser : IdentityUser<TKey>, new()
         where TKey : IEquatable<TKey>
@@ -106,8 +106,10 @@ namespace Pixel.Identity.Core.Controllers
             var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
+                Console.WriteLine("There is no user");
                 return false;
             }
+            Console.WriteLine("There is a user"+ user.Email);
             return await userManager.HasPasswordAsync(user);
         }
 

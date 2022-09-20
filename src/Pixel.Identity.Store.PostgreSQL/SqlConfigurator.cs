@@ -36,6 +36,7 @@ public class SqlConfigurator : IDataStoreConfigurator
         return services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("PostgreServerConnection"));
+            // options.UseNpgsql("Host=127.0.0.1;Port=5432;Database=pixel_identity_db;Username=postgres;Password=123456");
 
             // Register the entity sets needed by OpenIddict.
             // Note: use the generic overload if you need
@@ -95,7 +96,7 @@ public class SqlConfigurator : IDataStoreConfigurator
               .AddRazorPagesOptions(options =>
               {
                   options.Conventions.Add(new IdentityPageModelConvention<ApplicationUser, Guid>());
-              }); ;
+              });
         services.AddHostedService<Worker>();
     }
 }

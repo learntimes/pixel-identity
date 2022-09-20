@@ -1,0 +1,54 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "firefox",
+            "request": "attach",
+            "name": "Attach",            
+            "url": "https://localhost:7109/scopes/list",
+            "webRoot": "${workspaceFolder}/src/Pixel.Identity.Server"
+
+        },
+        {
+            "name": "Launch Chrome",
+            "request": "launch",
+            "type": "chrome",
+            "url": "https://localhost:7109/scopes/list",
+            "webRoot": "${workspaceFolder}/src/Pixel.Identity.Server"
+        },
+
+
+
+        {
+            "name": ".NET Core Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/Pixel.Identity.Server/bin/Debug/net6.0/Pixel.Identity.Server.dll",
+            // "program": "${workspaceFolder}/.builds/Identity/Debug/net6.0/Pixel.Identity.Server.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+
+        // {
+        //     "type": "blazorwasm",
+        //     "name": "Launch and Debug Blazor WebAssembly Application",
+        //     "request": "launch",
+        //     "url": "https://localhost:44382"
+        // }
+    ]
+}

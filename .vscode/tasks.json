@@ -1,0 +1,44 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",                
+                // 调试不同的项目，对应不同的csproj
+                // "${workspaceFolder}/src/Pixel.Identity.Provider/Pixel.Identity.Provider",                
+                // 调多个项目可以直接将Build下的内容设置为解决方案，这样每次生成，都将解决方案的csproj重新生成
+                "${workspaceFolder}/Pixel.Identity.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/src/Pixel.Identity.Server/Pixel.Identity.Server",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/src/Pixel.Identity.Server/Pixel.Identity.Server",
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
