@@ -1,9 +1,13 @@
 ﻿using Pixel.Identity.Shared.Models;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Pixel.Identity.Server.Utilities;
+using System.Xml;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace Pixel.Identity.Server.Services
 {
@@ -74,14 +78,49 @@ namespace Pixel.Identity.Server.Services
         /// <param name="httpClient"></param>
         public AccountService(HttpClient httpClient)
         {
-            this.httpClient = httpClient;            
+            this.httpClient = httpClient;
         }
 
         /// <inheritdoc/> 
         public async Task<bool> GetHasPasswordAsync()
         {
-            return await JsonSerializer.DeserializeAsync<bool>
-                       (await httpClient.GetStreamAsync($"api/account/haspassword"));
+            // return await JsonSerializer.DeserializeAsync<bool>
+            //           (await httpClient.GetStreamAsync($"api/account/haspassword"));
+
+            var httpRequestMessage = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("https://localhost:7129/api/account/haspassword"),
+                Headers = {
+                    // { HttpRequestHeader.Authorization.ToString(), "Bearer token" },
+                    { HttpRequestHeader.Accept.ToString(), "application/xml" },
+                    { HttpRequestHeader.AcceptCharset.ToString(), "utf-8"}
+                }
+            };
+
+            var response = await httpClient.SendAsync(httpRequestMessage);
+            XmlSerializer serializer = new(typeof(Boolean));
+
+            // XmlReaderSettings settings = new();
+            // settings.DtdProcessing = DtdProcessing.Parse;
+            bool HasPassword;
+
+            var xml = response.Content.ReadAsStringAsync().Result; 
+            // Console.WriteLine(xml);           
+            using (StringReader reader = new(xml))
+            {
+                HasPassword = (bool)serializer.Deserialize(reader);
+
+            }
+
+            // using (Stream stream = response.Content.ReadAsStreamAsync().Result)
+            // {
+            //     HasPassword = (bool)serializer.Deserialize(stream);
+            // }
+
+            return HasPassword;
+            // return await response.Content.ReadFromJsonAsync<bool>();
+
         }
 
         /// <inheritdoc/> 

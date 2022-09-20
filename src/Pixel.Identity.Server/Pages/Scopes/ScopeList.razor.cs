@@ -43,7 +43,12 @@ namespace Pixel.Identity.Server.Pages.Scopes
                 scopesRequest.CurrentPage = resetCurrentPage ? 1 : (state.Page + 1);
                 resetCurrentPage = false;
                 scopesRequest.PageSize = state.PageSize;
+
+                Console.WriteLine("这里是ScopeList.razor的GetScopesDataAsync");
                 var sessionPage = await Service.GetScopesAsync(scopesRequest);
+
+                Console.WriteLine("sessionPage.ItemsCount: "+sessionPage.ItemsCount.ToString());
+                sessionPage.Items.ForEach(i => Console.WriteLine("list a scope: "+i.Name));
 
                 return new TableData<ScopeViewModel>
                 {

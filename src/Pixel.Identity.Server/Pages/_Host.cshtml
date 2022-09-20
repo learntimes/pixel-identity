@@ -3,10 +3,14 @@
 @* @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf *@
 @using Pixel.Identity.Server.Utilities
 @using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
 @using Microsoft.AspNetCore.Authentication.OpenIdConnect
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.IdentityModel.Protocols.OpenIdConnect
+@using System.Net.Http
+@using System.Net.Http.Headers
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
     Layout = "_Layout";
 }
@@ -14,10 +18,9 @@
 @{
     var tokens = new TokenProvider
     {
-        AccessToken = await HttpContext.GetTokenAsync("access_token"),        
-        RefreshToken = await HttpContext.GetTokenAsync("refresh_token"),
-        @* XsrfToken = Xsrf.GetAndStoreTokens(HttpContext).RequestToken *@
-
+        AccessToken = await HttpContext.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectParameterNames.AccessToken),
+        @* AccessToken = await HttpContext.GetTokenAsync("access_token"),         *@
+        RefreshToken = await HttpContext.GetTokenAsync("refresh_token")       
     };
 
     Console.WriteLine($"初始化获取AccessToken={tokens.AccessToken}, RefreshToken={tokens.RefreshToken}");

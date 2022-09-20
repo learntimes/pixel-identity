@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Pixel.Identity.Server.Utilities
 
 <AuthorizeView>
     <Authorized>
@@ -11,9 +12,10 @@
                      <li><b>@claimGroup.Key</b>: @claimValue</li>
                 }               
             }
-        </ul>
+        </ul>        
     </Authorized>
     <NotAuthorized>
        <RedirectToLogin/>
     </NotAuthorized>
 </AuthorizeView>
+

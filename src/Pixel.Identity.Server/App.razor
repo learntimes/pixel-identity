@@ -29,18 +29,15 @@
 
 @code {
     [Parameter]
-    public TokenProvider InitialState { get; set; }
+    public TokenProvider InitialState { get; set; }   
 
     protected override Task OnInitializedAsync()
     {
         TokenService.AccessToken = InitialState.AccessToken;
         TokenService.RefreshToken = InitialState.RefreshToken;
 
-        @* TokenService.XsrfToken = InitialState.XsrfToken; *@
-
         Console.WriteLine($"APP初始化获取AccessToken={TokenService.AccessToken}, RefreshToken={TokenService.RefreshToken}");
-        @* Console.WriteLine($"XsrfToken={TokenService.XsrfToken}"); *@
-        
+          
         return base.OnInitializedAsync();
     }
 }
